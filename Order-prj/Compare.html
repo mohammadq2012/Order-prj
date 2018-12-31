@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ComparePage</title>
+    <meta charset="utf-8" />
+    <style>
+        #All {
+          background-image:linear-gradient(rgb(240, 236, 12) , rgb(161, 224, 14) , rgb(17, 192, 11) , rgb(149, 211, 5));
+          width: 1505px;
+          height: 850px;
+          overflow: hidden;
+        }
+
+        #div1{
+            margin-left:65px;
+            float: left;
+        }
+
+        #div2{
+            margin-left:65px;
+            margin-top: 21px;            
+        }
+
+
+
+        #textarea1{ 
+            background-image:linear-gradient(rgb(97, 3, 10) , rgb(78, 9, 50) , rgb(75, 2, 42) , rgb(51, 2, 53));
+            margin-top: 3px;
+            color: aliceblue;
+            text-align: left;
+            text-shadow: rgb(145, 138, 145);
+        }
+
+        #textarea2{             
+            background-image:linear-gradient(rgb(97, 3, 10) , rgb(78, 9, 50) , rgb(75, 2, 42) , rgb(51, 2, 53));            
+            color: aliceblue;
+            margin-left: 10px;
+            text-align: left;
+            text-shadow: rgb(145, 138, 145);
+        }
+
+        #write1{
+            margin-left: 260px; 
+            font-size: 18px;
+            font-style: italic;
+            font-weight: bold;
+            text-shadow: 1px 1px rgb(145, 10, 10);
+        }
+
+        #write2{
+            overflow: auto;
+            margin-left: 960px; 
+            font-size: 18px;
+            font-style: italic;
+            font-weight: bold;
+            text-shadow: 1px 1px rgb(145, 10, 10);
+        }
+
+        #All #button{
+            font-weight: bold;
+            color:rgb(255, 255, 255);
+            text-decoration:none;
+            width:90px;
+            border-radius:3px;
+            background-image:linear-gradient(rgb(19, 231, 167) , rgb(35, 4, 148));
+            text-align:center;
+            margin-left: 695px;
+            margin-top:65px;
+            height:30px;
+            cursor:pointer;
+        }
+
+
+        #result{
+            color:white;
+            background-image:linear-gradient(rgb(255, 0, 0) , rgb(245, 7, 7));
+            text-align:center;
+            font-weight: bold;
+            margin-top:15px;
+            height: 40px;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div id="All">
+        <div id="div1">
+        <p id="write1">Write your first code:</code></p>
+            <textarea id="textarea1" rows="30" cols="90"> 
+                    int main(){
+                        int i = 0;
+                        for( ; i < n ; i++){
+                        printf("*");
+                        }}              
+            </textarea> 
+
+        </div>
+         
+        <div id="div2">
+        <p id="write2">Write your second code:</code></p>
+            <textarea id="textarea2" rows="30" cols="90"> 
+                    int main(){
+                        int i = 0;
+                        for( ; i < n ; i++){
+                        printf("*");
+                        }}              
+            </textarea>    
+        </div>
+
+            <div>
+                <button type="submit"   id="button" onclick="call_compare()">Calaculate</button>    
+            </div>
+            <div id="result"></div>
+    </div>  
+    
+    
+
+    <script>
+
+        
+            const mylang={
+                lang: "c",
+                version: "3" 
+            }
+function call_compare()
+{
+    compare_fn(document.getElementById("textarea1").value)
+    compare_fn(document.getElementById("textarea2").value)
+
+}
+
+
+function compare_fn(z){
+    i=1;
+    var accuracy = 5;
+        var points = "";
+        var code = "#include<stdio.h>\nint n = ";
+          var myPoint="";
+      var x = z
+         for (let i = 1 ; i<= accuracy ; i++){
+            let req = new XMLHttpRequest();
+            let myCode  = code + i + ";\n" +x;
+            const url = "https://api.jdoodle.com/v1/execute";
+            var payloads = {clientId: "6043bccb5b57d7817c7469ee12e32743",
+                            clientSecret: "34cdbdeaeb0832b427e21e972b4577be3a3fe17236e18dcaa7c70e5aa0fa2d0f",
+                            script: myCode,
+                            language: mylang.lang ,
+                            versionIndex: mylang.version};
+            req.open("POST", url);
+            req.setRequestHeader('Content-type', 'application/json');
+            var jsoned = JSON.stringify(payloads)
+            req.send(jsoned);
+            req.onload = () => {
+                if(req.status>=200 && req.status<400){
+                    let a = JSON.parse(req.response);
+                    let output = a.output;
+                    console.log(a,output)
+                 points+="(" + i + ","+output.length+") ";
+                 if (i == accuracy){
+                    var data = {
+                    tool : 'lagrange-interpolating-polynomial',
+                        points
+                    };
+                    var urlEncodedData = "";
+                    var urlEncodedDataPairs = [];
+                    for (var name in data){
+                        urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name]));
+                    }
+                    urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
+                    var url2 = "https://www.dcode.fr/api/";
+                    var funcreq = new XMLHttpRequest();
+                    funcreq.open("POST",url2);
+                    funcreq.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+                    funcreq.send(urlEncodedData);
+                    funcreq.onload = () => {
+                        var str = JSON.parse(funcreq.response).results;
+                        document.getElementById("result").innerHTML += "f(x)="+ str.slice(10,-3)+"<br>" ;
+                        
+                    }
+                 }
+                }
+                
+            }
+      }
+      
+      }
+        
+    
+    </script>
+
+</body>
+</html>

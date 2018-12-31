@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SinglePage</title>
+    <meta charset="utf-8" />
+    <style>
+        #All {
+            background-image:linear-gradient(rgb(240, 236, 12) , rgb(161, 224, 14) , rgb(17, 192, 11) , rgb(149, 211, 5));
+          width: 1505pxpx;
+          height: 850px;
+        }
+        #textarea{            
+            background-image:linear-gradient(rgb(97, 3, 10) , rgb(78, 9, 50) , rgb(75, 2, 42) , rgb(51, 2, 53));
+            /* background-color: rgb(83, 51, 83); */
+            margin: 0px;
+            margin-top: 0px;
+            margin-left: 410px;
+            color: aliceblue;
+            text-align: left;
+            text-shadow: rgb(145, 138, 145);
+        }
+
+        #write{
+            margin-top:0px;
+            margin-left: 410px; 
+            padding-top: 80px;
+            font-size: 18px;
+            font-style: italic;
+            font-weight: bold;
+            text-shadow: 1px 1px rgb(145, 10, 10);
+        }
+
+        #All #button{
+            font-weight: bold;
+            color:white;
+            text-decoration:none;
+            width:90px;
+            border-radius:3px;
+            background-image:linear-gradient(rgb(19, 231, 167) , rgb(35, 4, 148));
+            /* float:right; */
+            text-align:center;
+            margin-left: 700px;
+            margin-top:15px;
+            height:30px;
+            cursor:pointer;
+        }
+
+        #result{
+            color:white;
+            background-image:linear-gradient(rgb(255, 0, 0) , rgb(245, 7, 7));
+            text-align:center;
+            font-weight: bold;
+            margin-top:15px;
+            height: 30px;
+            /* padding: 12px; */
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div id="All">
+        
+        <p id="write">Write your code:</code></p>
+            <textarea id="textarea" rows="30" cols="90">               
+                int main(){
+                    int i = 0;
+                    for( ; i < n ; i++){
+                    printf("*");
+                    }}
+        </textarea>
+            <div>
+                <button type="submit" id="button" onclick="show1()">Calaculate</button>    
+            </div>
+
+            <div id="result"></div>
+    </div>
+    
+
+    <script>
+
+        
+
+
+        const mylang={
+            lang: "c",
+            version: "3" 
+            }
+
+        var accuracy = 5;
+        var points = "";
+        var code = "#include<stdio.h>\nint n = ";
+      function show1(){
+          var myPoint="";
+      var x = document.getElementById("textarea").value;
+         for (let i = 1 ; i<= accuracy ; i++){
+            let req = new XMLHttpRequest();
+            let myCode  = code + i + ";\n" +x;
+            const url = "https://api.jdoodle.com/v1/execute";
+            var payloads = {clientId: "6043bccb5b57d7817c7469ee12e32743",
+                            clientSecret: "34cdbdeaeb0832b427e21e972b4577be3a3fe17236e18dcaa7c70e5aa0fa2d0f",
+                            script: myCode,
+                            language: mylang.lang ,
+                            versionIndex: mylang.version};
+            req.open("POST", url);
+            req.setRequestHeader('Content-type', 'application/json');
+            var jsoned = JSON.stringify(payloads)
+            req.send(jsoned);
+            req.onload = () => {
+                if(req.status>=200 && req.status<400){
+                    let a = JSON.parse(req.response);
+                    let output = a.output;
+                    console.log(a,output)
+                 points+="(" + i + ","+output.length+") ";
+                 if (i == accuracy){
+                    var data = {
+                    tool : 'lagrange-interpolating-polynomial',
+                        points
+                    };
+                    var urlEncodedData = "";
+                    var urlEncodedDataPairs = [];
+                    for (var name in data){
+                        urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name]));
+                    }
+                    urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
+                    var url2 = "https://www.dcode.fr/api/";
+                    var funcreq = new XMLHttpRequest();
+                    funcreq.open("POST",url2);
+                    funcreq.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+                    funcreq.send(urlEncodedData);
+                    funcreq.onload = () => {
+                        var str = JSON.parse(funcreq.response).results;
+                        document.getElementById("result").innerHTML += "f(x)="+ str.slice(10,-3)+"<br>" ;
+                    }
+                 }
+                }
+                
+            }
+      }
+      
+      }
+
+    </script>
+
+
+
+</body>
+</html>
+
+
+<!-- 
+Client ID:f86ada8d7aff63ff8d88dd4dd2663ad5
+
+Client Secret: 2bb7f1412c286f8cb5b7bfba8066f228fed8d954a15eb6cd8e63dbffbd73d985 -->
